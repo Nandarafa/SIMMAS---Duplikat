@@ -1,8 +1,40 @@
+/**
+ * ============================================================================
+ * globals.css - Global Styles & Tailwind Configuration
+ * ============================================================================
+ * 
+ * FUNGSI:
+ * - Import Tailwind CSS layers (base, components, utilities)
+ * - Define CSS custom properties (variables) untuk theming
+ * - Custom animations dan keyframes
+ * - Reusable component classes
+ * 
+ * CARA MENGUBAH:
+ * - Ubah warna: Edit values di :root dan .dark
+ * - Tambah animation: Buat @keyframes baru dan class utility
+ * - Tambah component: Tambah di @layer components
+ * 
+ * STRUKTUR:
+ * 1. Tailwind imports
+ * 2. CSS Variables (light & dark mode)
+ * 3. Animations & Keyframes
+ * 4. Component Classes (@layer components)
+ * 
+ * ============================================================================
+ */
+
+/* ============================================================================
+   TAILWIND CSS IMPORTS
+   ============================================================================
+   Import Tailwind layers - order penting untuk specificity
+   ============================================================================ */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Toast Animation */
+/* ============================================================================
+   TOAST ANIMATION (Legacy - moved to @keyframes below)
+   ============================================================================ */
 @keyframes slideInRight {
   from {
     transform: translateX(400px);
@@ -18,44 +50,82 @@
   animation: slideInRight 0.3s ease-out;
 }
 
+/* ============================================================================
+   CSS CUSTOM PROPERTIES - LIGHT MODE
+   ============================================================================
+   
+   Format: --nama-variable: H S L;
+   H = Hue (0-360)
+   S = Saturation (0-100%)
+   L = Lightness (0-100%)
+   
+   Usage: background: hsl(var(--background));
+   
+   CARA MENGUBAH WARNA:
+   1. Pilih warna di https://hslpicker.com
+   2. Copy H S L values (tanpa 'hsl()' wrapper)
+   3. Update value di bawah
+   ============================================================================ */
 :root {
-  --background: 0 0% 100%;
-  --foreground: 222.2 84% 4.9%;
-  --muted: 210 40% 96.1%;
-  --muted-foreground: 215.4 16.3% 46.9%;
-  --primary: 221.2 83.2% 53.3%;
-  --primary-foreground: 210 40% 98%;
-  --border: 214.3 31.8% 91.4%;
-  --ring: 221.2 83.2% 53.3%;
-  --destructive: 0 84.2% 60.2%;
-  --warning: 38 92% 50%;
-  --success: 142 76% 36%;
+  --background: 0 0% 100%;              /* White - Background utama */
+  --foreground: 222.2 84% 4.9%;        /* Dark blue - Text utama */
+  --muted: 210 40% 96.1%;              /* Light gray - Background muted */
+  --muted-foreground: 215.4 16.3% 46.9%; /* Gray - Text muted */
+  --primary: 221.2 83.2% 53.3%;        /* Blue - Primary color (buttons, links) */
+  --primary-foreground: 210 40% 98%;   /* Almost white - Text on primary */
+  --border: 214.3 31.8% 91.4%;         /* Light gray - Borders */
+  --ring: 221.2 83.2% 53.3%;           /* Blue - Focus ring */
+  --destructive: 0 84.2% 60.2%;        /* Red - Destructive actions */
+  --warning: 38 92% 50%;               /* Orange - Warnings */
+  --success: 142 76% 36%;              /* Green - Success states */
 }
 
+/* ============================================================================
+   CSS CUSTOM PROPERTIES - DARK MODE
+   ============================================================================
+   
+   Aktifkan dengan: <html class="dark">
+   Tailwind auto-handle dengan class "dark:"
+   
+   CARA ENABLE DARK MODE:
+   1. Toggle class "dark" di <html> element
+   2. Gunakan dark: prefix di Tailwind: dark:bg-slate-900
+   ============================================================================ */
 .dark {
-  --background: 222.2 84% 4.9%;
-  --foreground: 210 40% 98%;
-  --muted: 217.2 32.6% 17.5%;
-  --muted-foreground: 215 20.2% 65.1%;
-  --primary: 217.2 91.2% 59.8%;
-  --primary-foreground: 222.2 47.4% 11.2%;
-  --border: 217.2 32.6% 17.5%;
-  --ring: 224.3 76.3% 48%;
-  --destructive: 0 62.8% 30.6%;
-  --warning: 38 92% 50%;
-  --success: 142 76% 36%;
+  --background: 222.2 84% 4.9%;        /* Dark blue - Background */
+  --foreground: 210 40% 98%;           /* Almost white - Text */
+  --muted: 217.2 32.6% 17.5%;          /* Dark gray - Muted background */
+  --muted-foreground: 215 20.2% 65.1%; /* Light gray - Muted text */
+  --primary: 217.2 91.2% 59.8%;        /* Lighter blue - Primary */
+  --primary-foreground: 222.2 47.4% 11.2%; /* Dark blue - Text on primary */
+  --border: 217.2 32.6% 17.5%;         /* Dark gray - Borders */
+  --ring: 224.3 76.3% 48%;             /* Blue - Focus ring */
+  --destructive: 0 62.8% 30.6%;        /* Darker red - Destructive */
+  --warning: 38 92% 50%;               /* Orange - Warnings */
+  --success: 142 76% 36%;              /* Green - Success */
 }
 
+/* ============================================================================
+   GLOBAL ELEMENT STYLES
+   ============================================================================ */
+
+/* Apply border color dari CSS variable ke semua elements */
 * {
   border-color: hsl(var(--border));
 }
 
+/* Body background dan text color dari CSS variables */
 body {
   background: hsl(var(--background));
   color: hsl(var(--foreground));
 }
 
-/* Custom color utilities */
+/* ============================================================================
+   CUSTOM COLOR UTILITIES
+   ============================================================================
+   Shorthand classes untuk CSS variables
+   Usage: <div className="bg-background text-foreground">
+   ============================================================================ */
 .bg-background { background-color: hsl(var(--background)); }
 .bg-muted { background-color: hsl(var(--muted)); }
 .text-foreground { color: hsl(var(--foreground)); }
@@ -66,64 +136,92 @@ body {
 .bg-primary-foreground { background-color: hsl(var(--primary-foreground)); }
 .border-border { border-color: hsl(var(--border)); }
 
+/* ============================================================================
+   CUSTOM UTILITIES LAYER
+   ============================================================================
+   Utilities yang bisa di-compose dengan Tailwind
+   ============================================================================ */
 @layer utilities {
+  /* Hide scrollbar tapi tetap bisa scroll */
   .scrollbar-none {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+    -ms-overflow-style: none;  /* IE & Edge */
+    scrollbar-width: none;     /* Firefox */
   }
   .scrollbar-none::-webkit-scrollbar {
-    display: none;
+    display: none;            /* Chrome, Safari, Opera */
   }
 }
 
+/* ============================================================================
+   ANIMATIONS & KEYFRAMES
+   ============================================================================
+   Custom animations untuk UI elements
+   
+   CARA MENGGUNAKAN:
+   <div className="animate-fadeIn">Content</div>
+   
+   CARA MENAMBAH ANIMATION BARU:
+   1. Buat @keyframes [nama] { ... }
+   2. Buat utility class .animate-[nama]
+   3. Gunakan di component
+   ============================================================================ */
 
+/* Float animation - untuk decorative elements */
 @keyframes float {
  0%, 100% { transform: translateY(0) rotate(0deg); }
  50% { transform: translateY(-8px) rotate(2deg); }
 }
 
+/* Fade up animation - untuk list items */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* Fade in animation - simple opacity */
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
 }
 
+/* Slide in from left - untuk sidebar items */
 @keyframes slideInLeft {
   from { opacity: 0; transform: translateX(-24px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
+/* Slide in from right - untuk modals, toasts */
 @keyframes slideInRight {
   from { opacity: 0; transform: translateX(24px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
+/* Pop animation - untuk buttons, icons */
 @keyframes pop {
  0% { opacity: 0; transform: scale(0.5); }
- 70% { transform: scale(1.15); }
+ 70% { transform: scale(1.15); }        /* Overshoot for bounce effect */
  100% { opacity: 1; transform: scale(1); }
 }
 
+/* Scale up animation - untuk modals */
 @keyframes scaleUp {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
 }
 
+/* Progress bar animation */
 @keyframes progress {
   from { transform: scaleX(0); }
   to { transform: scaleX(1); }
 }
 
+/* Shimmer animation - untuk skeleton loaders */
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
 }
 
-/* Animation utility classes */
+/* Animation utility classes - apply animations to elements */
 .animate-fadeUp { animation: fadeUp 0.5s ease forwards; }
 .animate-fadeIn { animation: fadeIn 0.5s ease forwards; }
 .animate-slideInLeft { animation: slideInLeft 0.5s ease forwards; }
@@ -131,27 +229,65 @@ body {
 .animate-scaleUp { animation: scaleUp 0.4s ease forwards; }
 .animate-float { animation: float 3s ease-in-out infinite; }
 
-/* Skeleton shimmer */
+/* Skeleton loader - loading state placeholders */
 .skeleton {
   background: linear-gradient(90deg, #f1f5f9 25%, #e2e8f0 50%, #f1f5f9 75%);
   background-size: 200% 100%;
   animation: shimmer 1.5s infinite;
 }
 
+/* ============================================================================
+   COMPONENT CLASSES LAYER
+   ============================================================================
+   Reusable component classes yang bisa digunakan di mana saja
+   Alternative untuk create separate components
+   
+   CARA MENGGUNAKAN:
+   <div className="card">...</div>
+   <button className="btn-primary">Click me</button>
+   
+   CARA MENAMBAH:
+   Tambah class baru di dalam @layer components
+   ============================================================================ */
 @layer components {
-  .card { @apply rounded-2xl bg-white border border-slate-200 p-6 shadow-sm; }
-  .btn-primary { @apply inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-60; }
-  .btn-outline { @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50; }
-  .input-field { @apply w-full px-3.5 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all; }
-  .label { @apply block text-[10px] uppercase tracking-[0.15em] font-bold text-slate-500 mb-1.5; }
-  .badge { @apply inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold uppercase whitespace-nowrap; }
+  /* Card component - container dengan shadow dan border */
+  .card { 
+    @apply rounded-2xl bg-white border border-slate-200 p-6 shadow-sm; 
+  }
+  
+  /* Primary button - main action buttons */
+  .btn-primary { 
+    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-bold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-60; 
+  }
+  
+  /* Outline button - secondary action buttons */
+  .btn-outline { 
+    @apply inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-50; 
+  }
+  
+  /* Input field - form inputs */
+  .input-field { 
+    @apply w-full px-3.5 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-600/30 focus:border-blue-600 transition-all; 
+  }
+  
+  /* Label - form labels */
+  .label { 
+    @apply block text-[10px] uppercase tracking-[0.15em] font-bold text-slate-500 mb-1.5; 
+  }
+  
+  /* Badge base - status badges */
+  .badge { 
+    @apply inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold uppercase whitespace-nowrap; 
+  }
+  
+  /* Badge variants - different colors for status */
   .badge.green { @apply bg-emerald-100 text-emerald-700; }
   .badge.yellow { @apply bg-yellow-100 text-yellow-700; }
   .badge.blue { @apply bg-blue-100 text-blue-700; }
   .badge.purple { @apply bg-purple-100 text-purple-700; }
   .badge.red { @apply bg-red-100 text-red-700; }
   
-  /* Data table styles */
+  /* ===== DATA TABLE STYLES ===== */
   .data-table { @apply w-full text-sm; }
   .data-table thead { @apply border-b border-slate-200; }
   .data-table th { @apply px-4 py-3 text-left font-semibold text-slate-600 uppercase text-xs; }

@@ -1,7 +1,24 @@
 /**
- * siswa-service.ts
- * Semua operasi CRUD untuk data siswa (placements, attendances, journals)
- * Menggunakan Supabase jika terkonfigurasi, fallback ke in-memory via callback.
+ * ============================================================================
+ * siswa-service.ts - Service Layer untuk Operasi Data Siswa
+ * ============================================================================
+ * 
+ * FUNGSI UTAMA:
+ * - Mengelola semua operasi CRUD untuk data siswa (placements, attendances, journals)
+ * - Terintegrasi dengan Supabase database (jika configured)
+ * - Fallback ke localStorage jika Supabase tidak tersedia
+ * 
+ * CARA KERJA:
+ * 1. Setiap fungsi cek apakah Supabase terkonfigurasi
+ * 2. Jika ya: simpan/ambil data dari Supabase database
+ * 3. Jika tidak: return null dan biarkan AuthContext handle dengan localStorage
+ * 
+ * CARA MENGUBAH:
+ * - Tambah fungsi CRUD baru: copy pattern fungsi yang ada (fetch/create/update/delete)
+ * - Ubah table name: ganti 'placements'/'attendances'/'journals' sesuai kebutuhan
+ * - Tambah validasi: tambahkan di dalam fungsi sebelum call Supabase
+ * 
+ * ============================================================================
  */
 
 import { supabase, isSupabaseConfigured } from './supabase';
@@ -10,76 +27,191 @@ import type { Placement, Attendance, Journal } from '@/types/database';
 /* ------------------------------------------------------------------ */
 /* Helper: throw-safe Supabase query                                   */
 /* ------------------------------------------------------------------ */
+
+/**
+ * sbQuery - Wrapper untuk query Supabase yang aman dari error
+ * 
+ * FUNGSI:
+ * - Mengeksekusi query Supabase dengan error handling
+ * - Return null jika Supabase tidak configured atau terjadi error
+ * - Log semua error untuk debugging
+ * 
+ * CARA MENGUBAH:
+ * - Tambah retry logic: tambahkan loop untuk retry otomatis
+ * - Custom error handling: tambah kondisi khusus untuk error tertentu
+ * - Timeout handling: tambahkan Promise.race dengan timeout
+ */
 async function sbQuery<T>(
   fn: () => PromiseLike<{ data: T | null; error: unknown }>
 ): Promise<T | null> {
+  // Cek apakah Supabase sudah dikonfigurasi
   if (!isSupabaseConfigured) {
     console.warn('[sbQuery] Supabase not configured');
     return null;
   }
+  
   try {
+    // Eksekusi query yang diberikan
     const { data, error } = await fn();
+    
+    // Jika ada error dari Supabase, log dan return null
     if (error) {
       console.error('[sbQuery] Supabase error:', error);
       return null;
     }
+    
+    // Return data jika berhasil
     return data;
   } catch (e) {
+    // Catch error network atau exception lainnya
     console.error('[sbQuery] Network/exception error:', e);
     return null;
   }
 }
 
 /* ================================================================== */
-/* PLACEMENTS                                                           */
+/* PLACEMENTS - Pengelolaan Data Penempatan Magang                      */
 /* ================================================================== */
 
-/** Ambil semua placement milik student_id dari Supabase */
+/**
+ * fetchMyPlacements - Ambil semua placement milik student_id dari Supabase
+ * 
+ * FUNGSI:
+ * - Fetch data penempatan magang siswa dari database
+ * - Diurutkan berdasarkan tanggal pembuatan (terbaru dulu)
+ * 
+ * PARAMETER:
+ * @param studentId - ID siswa yang ingin diambil data placement-nya
+ * 
+ * RETURN:
+ * - Array of Placement jika berhasil
+ * - null jika gagal atau Supabase tidak configured
+ * 
+ * CARA MENGUBAH:
+ * - Ubah sorting: ganti 'created_at' dengan field lain, atau ubah ascending: true
+ * - Filter tambahan: tambahkan .eq() atau .filter() setelah .eq('student_id')
+ * - Limit hasil: tambahkan .limit(10) untuk batasi jumlah data
+ */
 export async function fetchMyPlacements(studentId: string): Promise<Placement[] | null> {
   return sbQuery<Placement[]>(() =>
     supabase
-      .from('placements')
-      .select('*')
-      .eq('student_id', studentId)
-      .order('created_at', { ascending: false })
+      .from('placements')              // Nama table di Supabase
+      .select('*')                      // Ambil semua kolom
+      .eq('student_id', studentId)      // Filter by student_id
+      .order('created_at', { ascending: false })  // Urutkan dari terbaru
   );
 }
 
-/** Buat placement baru di Supabase */
+/**
+ * createPlacement - Buat placement baru di Supabase
+ * 
+ * FUNGSI:
+ * - Insert data penempatan magang baru ke database
+ * - Auto-generate ID oleh Supabase
+ * 
+ * PARAMETER:
+ * @param placement - Data placement (tanpa ID, ID auto-generated)
+ * 
+ * RETURN:
+ * - Placement object dengan ID jika berhasil
+ * - null jika gagal
+ * 
+ * CARA MENGUBAH:
+ * - Tambah validasi: cek required fields sebelum insert
+ * - Auto-fill field: tambahkan field default (created_at, dll) sebelum insert
+ * - Trigger notifikasi: panggil fungsi notif setelah berhasil insert
+ */
 export async function createPlacement(
   placement: Omit<Placement, 'id'>
 ): Promise<Placement | null> {
   console.log('[createPlacement] Attempting to insert:', placement);
+  
   const result = await sbQuery<Placement>(() =>
-    supabase.from('placements').insert(placement).select().single()
+    supabase
+      .from('placements')
+      .insert(placement)      // Insert data
+      .select()               // Return inserted data
+      .single()               // Expect single result
   );
+  
   if (result) {
     console.log('[createPlacement] Insert successful:', result);
   } else {
     console.error('[createPlacement] Insert failed');
   }
+  
   return result;
 }
 
-/** Update status placement di Supabase */
+/**
+ * updatePlacementStatus - Update status placement di Supabase
+ * 
+ * FUNGSI:
+ * - Update status penempatan (pending, approved, aktif, completed)
+ * - Digunakan untuk workflow approval dan status tracking
+ * 
+ * PARAMETER:
+ * @param id - ID placement yang akan diupdate
+ * @param status - Status baru ('pending' | 'approved' | 'aktif' | 'completed')
+ * 
+ * RETURN:
+ * - true jika berhasil update
+ * - false jika gagal
+ * 
+ * CARA MENGUBAH:
+ * - Tambah validation: cek apakah status transition valid (pending -> approved OK, completed -> pending NOT OK)
+ * - Auto-update timestamp: tambahkan updated_at field
+ * - Send notification: trigger notif ke guru/siswa saat status berubah
+ */
 export async function updatePlacementStatus(
   id: string,
   status: Placement['status']
 ): Promise<boolean> {
   const result = await sbQuery(() =>
-    supabase.from('placements').update({ status }).eq('id', id).select().single()
+    supabase
+      .from('placements')
+      .update({ status })      // Update hanya field status
+      .eq('id', id)            // WHERE id = ?
+      .select()
+      .single()
   );
+  
   return result !== null;
 }
 
-/** Update placement data di Supabase */
+/**
+ * updatePlacement - Update data placement di Supabase
+ * 
+ * FUNGSI:
+ * - Update field placement (bisa beberapa field sekaligus)
+ * - Lebih flexible daripada updatePlacementStatus
+ * 
+ * PARAMETER:
+ * @param id - ID placement yang akan diupdate
+ * @param data - Object berisi field-field yang ingin diupdate
+ * 
+ * RETURN:
+ * - true jika berhasil
+ * - false jika gagal
+ * 
+ * CARA MENGUBAH:
+ * - Restrict fields: tambah whitelist field yang boleh diupdate
+ * - Add audit trail: log siapa yang update dan kapan
+ * - Validate permissions: cek apakah user boleh update placement ini
+ */
 export async function updatePlacement(
   id: string,
   data: Partial<Placement>
 ): Promise<boolean> {
   const result = await sbQuery(() =>
-    supabase.from('placements').update(data).eq('id', id).select().single()
+    supabase
+      .from('placements')
+      .update(data)            // Update multiple fields
+      .eq('id', id)
+      .select()
+      .single()
   );
+  
   return result !== null;
 }
 

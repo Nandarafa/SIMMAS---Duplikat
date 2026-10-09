@@ -1,27 +1,76 @@
 {
+  // ============================================================================
+  // TypeScript Configuration - SIMMAS
+  // ============================================================================
+  // 
+  // FUNGSI:
+  // - Mengatur bagaimana TypeScript mengcompile kode
+  // - Mengatur strict type checking untuk keamanan kode
+  // - Konfigurasi path aliases (@/* -> ./src/*)
+  // 
+  // CARA MENGUBAH:
+  // - Ubah "strict": false jika mau disable strict mode (tidak disarankan)
+  // - Tambah path alias: tambah entry di "paths" object
+  // - Ubah target: ganti "ES2017" ke "ES2020" untuk fitur JS lebih baru
+  // 
+  // ============================================================================
+
   "compilerOptions": {
+    // Target JavaScript version yang dihasilkan
     "target": "ES2017",
+    
+    // Library yang tersedia (DOM APIs, ES features)
     "lib": ["dom", "dom.iterable", "esnext"],
+    
+    // Allow JavaScript files to be compiled
     "allowJs": true,
+    
+    // Skip type checking library files (faster compilation)
     "skipLibCheck": true,
+    
+    // Enable strict type checking (JANGAN DIUBAH - untuk keamanan)
     "strict": true,
+    
+    // Don't emit output files (Next.js handles this)
     "noEmit": true,
+    
+    // Better interop between CommonJS and ES modules
     "esModuleInterop": true,
+    
+    // Module system
     "module": "esnext",
     "moduleResolution": "bundler",
+    
+    // Allow importing JSON files
     "resolveJsonModule": true,
+    
+    // Each file is a separate module (required for Next.js)
     "isolatedModules": true,
+    
+    // JSX support for React
     "jsx": "preserve",
+    
+    // Incremental compilation for faster builds
     "incremental": true,
+    
+    // Next.js plugin for better IDE support
     "plugins": [
       {
         "name": "next"
       }
     ],
+    
+    // Path aliases - @/* maps to ./src/*
+    // Contoh: import Button from '@/components/Button'
+    // Cara tambah alias baru: "@components/*": ["./src/components/*"]
     "paths": {
       "@/*": ["./src/*"]
     }
   },
+  
+  // Files to include in compilation
   "include": ["next-env.d.ts", "src/**/*.ts", "src/**/*.tsx", ".next/types/**/*.ts"],
+  
+  // Files to exclude from compilation
   "exclude": ["node_modules", "extracted_*.tsx"]
 }

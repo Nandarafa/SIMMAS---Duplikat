@@ -2,29 +2,72 @@
   "name": "simmas-magang",
   "version": "0.1.0",
   "private": true,
+  
+  // ============================================================================
+  // SCRIPTS - Command yang bisa dijalankan dengan npm run [nama]
+  // ============================================================================
+  // 
+  // CARA MENJALANKAN:
+  // - Development: npm run dev (http://localhost:3000)
+  // - Production build: npm run build
+  // - Production start: npm run start
+  // - Lint check: npm run lint
+  // 
+  // CARA MENAMBAH SCRIPT BARU:
+  // "test": "jest",
+  // "format": "prettier --write .",
+  // "type-check": "tsc --noEmit"
+  // 
+  // ============================================================================
+  
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+    "dev": "next dev",           // Start development server
+    "build": "next build",       // Build untuk production
+    "start": "next start",       // Start production server
+    "lint": "next lint"          // Check code quality
   },
+  
+  // ============================================================================
+  // DEPENDENCIES - Package yang dibutuhkan aplikasi untuk berjalan
+  // ============================================================================
+  // 
+  // JANGAN EDIT MANUAL! Gunakan: npm install [package-name]
+  // 
+  // Core packages:
+  // - next: Framework React dengan SSR dan routing
+  // - react: UI library
+  // - @supabase/*: Database dan auth client
+  // - lucide-react: Icon library
+  // - tailwindcss utils: clsx dan tailwind-merge
+  // 
+  // ============================================================================
+  
   "dependencies": {
-    "@supabase/ssr": "^0.5.2",
-    "@supabase/supabase-js": "^2.49.1",
-    "clsx": "^2.1.1",
-    "lucide-react": "^1.16.0",
-    "next": "^15.2.1",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "tailwind-merge": "^3.0.2"
+    "@supabase/ssr": "^0.5.2",           // Supabase untuk Server-Side Rendering
+    "@supabase/supabase-js": "^2.49.1",  // Supabase client library
+    "clsx": "^2.1.1",                    // Utility untuk conditional className
+    "lucide-react": "^1.16.0",           // Icon library (alternative Heroicons)
+    "next": "^15.2.1",                   // Next.js framework
+    "react": "^19.0.0",                  // React library
+    "react-dom": "^19.0.0",              // React DOM renderer
+    "tailwind-merge": "^3.0.2"           // Merge Tailwind classes dengan benar
   },
+  
+  // ============================================================================
+  // DEV DEPENDENCIES - Package hanya untuk development (tidak di production)
+  // ============================================================================
+  // 
+  // JANGAN EDIT MANUAL! Gunakan: npm install -D [package-name]
+  // 
+  // ============================================================================
+  
   "devDependencies": {
-    "@types/node": "^22.13.9",
-    "@types/react": "^19.0.10",
-    "@types/react-dom": "^19.0.4",
-    "autoprefixer": "^10.4.20",
-    "postcss": "^8.5.3",
-    "tailwindcss": "^3.4.17",
-    "typescript": "^5.8.2"
+    "@types/node": "^22.13.9",           // TypeScript types untuk Node.js
+    "@types/react": "^19.0.10",          // TypeScript types untuk React
+    "@types/react-dom": "^19.0.4",       // TypeScript types untuk React DOM
+    "autoprefixer": "^10.4.20",          // Auto add CSS vendor prefixes
+    "postcss": "^8.5.3",                 // CSS processor (required by Tailwind)
+    "tailwindcss": "^3.4.17",            // Tailwind CSS framework
+    "typescript": "^5.8.2"               // TypeScript compiler
   }
 }
